@@ -1,43 +1,40 @@
 ---
 controller_templates:
   - name: Create cloudflare template
-    ansible.controller.job_template:
-      name: "SSL // CloudFlare challenege"
-      job_type: "run"
-      inventory: "{{ inventory }}"
-      project: "aap_ssl_demo"
-      playbook: "/playbooks/cloudflare_dns.yml"
-      execution_environment: "{{ execution_environment }}"
-      label: "ssl_demo"
-      credentials:
-        - "Cloudflare"
-        - "Hashicorp Vault"
-      state: present
+    name: "SSL // CloudFlare challenege"
+    job_type: "run"
+    inventory: "{{ inventory }}"
+    project: "aap_ssl_demo"
+    playbook: "/playbooks/cloudflare_dns.yml"
+    execution_environment: "{{ execution_environment }}"
+    label: "ssl_demo"
+    credentials:
+      - "Cloudflare"
+      - "Hashicorp Vault"
+    state: present
 
   - name: Create rhel template
-    ansible.controller.job_template:
-      name: "SSL // RHEL Cockpit"
-      job_type: "run"
-      inventory: "{{ inventory }}"
-      project: "aap_ssl_demo"
-      playbook: "/playbooks/configure_cockpit.yml"
-      execution_environment: "{{ execution_environment }}"
-      label: "ssl_demo"
-      credentials:
-        - "RHEL admin"
-        - "Wildcard cert files"
-      state: present
+    name: "SSL // RHEL Cockpit"
+    job_type: "run"
+    inventory: "{{ inventory }}"
+    project: "aap_ssl_demo"
+    playbook: "/playbooks/configure_cockpit.yml"
+    execution_environment: "{{ execution_environment }}"
+    label: "ssl_demo"
+    credentials:
+      - "RHEL admin"
+      - "Wildcard cert files"
+    state: present
 
   - name: Create windows template
-    ansible.controller.job_template:
-      name: "SSL // Windows IIS"
-      job_type: "run"
-      inventory: "{{ inventory }}"
-      project: "aap_ssl_demo"
-      playbook: "/playbooks/iis_ssl_renewal.yml"
-      execution_environment: "{{ execution_environment }}"
-      label: "ssl_demo"
-      credentials:
-        - "Windows admin"
-        - "Wildcard cert files"
-      state: present
+    name: "SSL // Windows IIS"
+    job_type: "run"
+    inventory: "{{ inventory }}"
+    project: "aap_ssl_demo"
+    playbook: "/playbooks/iis_ssl_renewal.yml"
+    execution_environment: "{{ execution_environment }}"
+    label: "ssl_demo"
+    credentials:
+      - "Windows admin"
+      - "Wildcard cert files"
+    state: present
