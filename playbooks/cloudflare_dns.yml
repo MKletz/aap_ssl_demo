@@ -1,0 +1,137 @@
+---
+- name: Renew SSL Certificate via ACME DNS-01 (EE Localhost to Vault)
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    # Using /tmp for all transient files
+    cert_path: "/tmp/{{ domain_name }}.crt"
+    fullchain_path: "/tmp/{{ domain_name }}_fullchain.crt"
+    key_path: "/tmp/{{ domain_name }}.key"
+    account_key_path: "/tmp/letsencrypt_account.key"
+    csr_path: "/tmp/{{ domain_name }}.csr"
+    propagation_retries: 5
+    propagation_delay: 60
+
+    # Change with extra_vars
+    acme_directory: https://acme-staging-v02.api.letsencrypt.org/directory
+    domain_name: mikemitchell.info
+
+  tasks:
+    - name: Generate ACME account key
+      community.crypto.openssl_privatekey:
+        path: "{{ account_key_path }}"
+        mode: '0600'
+
+    # NEW TASK: Proactively manage the ACME account
+    - name: Ensure ACME account exists
+      community.crypto.acme_account:
+        account_key_src: "{{ account_key_path }}"
+        state: present
+        terms_agreed: true
+        acme_directory: "{{ acme_directory }}"
+        acme_version: 2
+        contact:
+          - "mailto:{{ acme_email }}"
+
+    - name: Generate certificate private key
+      community.crypto.openssl_privatekey:
+        path: "{{ key_path }}"
+        mode: '0600'
+
+    - name: Generate Certificate Signing Request (CSR)
+      community.crypto.openssl_csr:
+        path: "{{ csr_path }}"
+        privatekey_path: "{{ key_path }}"
+        common_name: "{{ domain_name }}"
+        subject_alt_name: 
+          - "DNS:{{ domain_name }}"
+          - "DNS:*.{{ domain_name }}"
+
+    - name: Initiate ACME DNS-01 challenge
+      community.crypto.acme_certificate:
+        acme_directory: "{{ acme_directory }}"
+        acme_version: 2
+        account_email: "{{ acme_email }}"
+        account_key_src: "{{ account_key_path }}"
+        csr: "{{ csr_path }}"
+        dest: "{{ cert_path }}"
+        fullchain_dest: "{{ fullchain_path }}"
+        remaining_days: 30
+        challenge: dns-01
+        modify_account: false
+      register: acme_challenge
+
+    - name: Create Cloudflare DNS challenge records
+      community.general.cloudflare_dns:
+        zone: "{{ domain_name }}"
+        record: "{{ item.0.key }}"
+        type: TXT
+        value: "{{ item.1 }}"
+        api_token: "{{ cloudflare_token }}"
+        state: present
+        solo: false
+        ttl: 120
+      loop: "{{ acme_challenge.challenge_data_dns | dict2items | subelements('value') }}"
+      when: acme_challenge is changed
+
+    - name: Wait for DNS propagation
+      ansible.builtin.pause:
+        seconds: "{{ propagation_delay }}"
+      when: acme_challenge is changed
+
+    - name: Finalize ACME certificate
+      community.crypto.acme_certificate:
+        acme_directory: "{{ acme_directory }}"
+        acme_version: 2
+        account_email: "{{ acme_email }}"
+        account_key_src: "{{ account_key_path }}"
+        csr: "{{ csr_path }}"
+        dest: "{{ cert_path }}"
+        fullchain_dest: "{{ fullchain_path }}"
+        challenge: dns-01
+        data: "{{ acme_challenge }}"
+      when: acme_challenge is changed
+      retries: "{{ propagation_retries }}"
+      delay: "{{ propagation_delay }}"
+
+    - name: Clean up Cloudflare DNS records
+      community.general.cloudflare_dns:
+        zone: "{{ domain_name }}"
+        record: "{{ item.key }}"
+        type: TXT
+        api_token: "{{ cloudflare_token }}"
+        state: absent
+      loop: "{{ acme_challenge.challenge_data_dns | dict2items }}"
+      when: acme_challenge is changed
+
+    # VAULT SECTION: Read from /tmp and push to Vault
+    - name: Read generated certificate files
+      ansible.builtin.set_fact:
+        cert_val: "{{ lookup('ansible.builtin.file', cert_path) }}"
+        key_val: "{{ lookup('ansible.builtin.file', key_path) }}"
+        fullchain_val: "{{ lookup('ansible.builtin.file', fullchain_path) }}"
+      when: acme_challenge is changed
+      no_log: true
+
+    - name: Push certificates to HashiCorp Vault
+      community.hashi_vault.vault_kv2_write:
+        url: "{{ vault_url }}"
+        token: "{{ vault_token }}"
+        engine_mount_point: "secret"
+        path: "certificates/{{ domain_name }}"
+        data:
+          certificate: "{{ cert_val }}"
+          private_key: "{{ key_val }}"
+          fullchain: "{{ fullchain_val }}"
+      when: acme_challenge is changed
+      no_log: true
+
+    - name: Retrieve certificates from HashiCorp Vault
+      community.hashi_vault.vault_kv2_get:
+        url: "{{ vault_url }}"
+        token: "{{ vault_token }}"
+        engine_mount_point: "secret"
+        path: "certificates/{{ domain_name }}"
+      register: vault_certs
+      no_log: true

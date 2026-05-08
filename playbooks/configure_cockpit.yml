@@ -1,0 +1,63 @@
+---
+- name: Configure Cockpit with SSL from HashiCorp Vault
+  hosts: rhel_cockpit
+  gather_facts: false
+  become: true
+  vars:
+    domain_name: "mikemitchell.info"
+    cockpit_cert_dir: "/etc/cockpit/ws-certs.d"
+    cockpit_combined_file: "{{ cockpit_cert_dir }}/{{ domain_name }}.cert"
+
+  tasks:
+    - ansible.builtin.fail:
+        msg: 'Variable {{ item }} not defined.'
+      when: item is not defined
+      with_items:
+        - vault_cert
+        - vault_private_key
+    
+    - name: Ensure required packages are present
+      ansible.builtin.dnf:
+        name:
+          - cockpit
+          - firewalld
+        state: present
+
+    - name: Create combined certificate file for Cockpit
+      # We combine the cert and private_key directly from Vault into the file
+      ansible.builtin.copy:
+        dest: "{{ cockpit_combined_file }}"
+        content: |
+          {{ vault_cert }}
+          {{ vault_private_key }}
+        owner: root
+        group: root
+        mode: '0640'
+        setype: cert_t
+      register: cockpit_cert_file
+
+    - name: Ensure firewalld is running
+      ansible.builtin.systemd:
+        name: firewalld
+        state: started
+        enabled: true
+
+    - name: Ensure Cockpit port is open in firewalld
+      ansible.posix.firewalld:
+        service: cockpit
+        permanent: true
+        state: enabled
+      notify: Reload Firewall
+
+    - name: Restart Cockpit service if certificate changed
+      ansible.builtin.systemd:
+        name: cockpit
+        enabled: true
+        state: restarted
+      when: cockpit_cert_file.changed
+
+  handlers:
+    - name: Reload Firewall
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded

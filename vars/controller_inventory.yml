@@ -1,0 +1,7 @@
+---
+controller_groups:
+- name: rhel_cockpit
+  inventory: "{{ inventory }}"
+
+- name: windows_iis
+  inventory: "{{ inventory }}"

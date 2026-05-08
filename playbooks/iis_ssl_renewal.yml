@@ -1,0 +1,77 @@
+---
+- name: Configure IIS Default Web Site with Vault SSL
+  hosts: windows_iis
+  gather_facts: false
+
+  tasks:
+    - ansible.builtin.fail:
+        msg: 'Variable {{ item }} not defined.'
+      when: item is not defined
+      with_items:
+        - vault_cert
+        - vault_private_key
+        - vault_fullchain
+
+    - name: Create temporary PFX file
+      community.crypto.openssl_pkcs12:
+        action: export
+        path: "/tmp/{{ domain_name }}.pfx"
+        friendly_name: "{{ domain_name }}"
+        # IIS PFXs usually require a password, even if blank
+        passphrase: "password" 
+        privatekey_content: "{{ vault_private_key }}"
+        certificate_content: "{{ vault_cert }}"
+        other_certificates_content: "{{ vault_fullchain }}"
+        state: present
+      delegate_to: localhost
+      #no_log: true
+
+    - name: Ensure IIS and Management Tools are installed
+      ansible.windows.win_feature:
+        name: 
+          - Web-Server
+          - Web-Mgmt-Tools
+        state: present
+
+    - name: Create temporary directory
+      ansible.windows.win_tempfile:
+        state: directory
+        suffix: build
+      register: temp_dir
+
+    - name: Copy PFX to Windows Server
+      ansible.windows.win_copy:
+        src: "/tmp/{{ domain_name }}.pfx"
+        dest: "{{ temp_dir.path }}\\{{ domain_name }}.pfx"
+      #no_log: true
+
+    - name: Import Certificate into Windows Certificate Store
+      ansible.windows.win_certificate_store:
+        path: "{{ temp_dir.path }}\\{{ domain_name }}.pfx"
+        password: "password"
+        store_name: WebHosting
+        store_location: LocalMachine
+        key_exportable: true
+        key_storage: machine
+        state: present
+      register: cert_import
+
+    - name: Create HTTPS Binding for Default Web Site
+      community.windows.win_iis_webbinding:
+        name: "Default Web Site"
+        protocol: https
+        port: 443
+        certificate_store_name: WebHosting
+        certificate_hash: "{{ cert_import.thumbprints[0] }}"
+        state: present
+
+    - name: Cleanup temporary PFX on Windows
+      ansible.windows.win_file:
+        path: "{{ temp_dir.path }}\\{{ domain_name }}.pfx"
+        state: absent
+
+    - name: Cleanup temporary PFX on localhost
+      ansible.builtin.file:
+        path: "/tmp/{{ domain_name }}.pfx"
+        state: absent
+      delegate_to: localhost

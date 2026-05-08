@@ -1,0 +1,7 @@
+---
+controller_projects:
+  - name: aap_ssl_demo
+    organization: Default
+    scm_type: git
+    scm_update_on_launch: 'yes'
+    scm_url: https://github.com/MKletz/aap_ssl_demo
