@@ -12,11 +12,8 @@
     csr_path: "/tmp/{{ domain_name }}.csr"
     propagation_retries: 5
     propagation_delay: 60
-
     # Change with extra_vars
     acme_directory: https://acme-staging-v02.api.letsencrypt.org/directory
-    domain_name: mikemitchell.info
-
   tasks:
     - name: Generate ACME account key
       community.crypto.openssl_privatekey:

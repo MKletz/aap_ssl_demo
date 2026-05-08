@@ -2,7 +2,6 @@
 - name: Configure IIS Default Web Site with Vault SSL
   hosts: windows_iis
   gather_facts: false
-
   tasks:
     - ansible.builtin.fail:
         msg: 'Variable {{ item }} not defined.'

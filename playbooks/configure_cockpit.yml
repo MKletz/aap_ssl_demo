@@ -4,10 +4,8 @@
   gather_facts: false
   become: true
   vars:
-    domain_name: "mikemitchell.info"
     cockpit_cert_dir: "/etc/cockpit/ws-certs.d"
     cockpit_combined_file: "{{ cockpit_cert_dir }}/{{ domain_name }}.cert"
-
   tasks:
     - ansible.builtin.fail:
         msg: 'Variable {{ item }} not defined.'

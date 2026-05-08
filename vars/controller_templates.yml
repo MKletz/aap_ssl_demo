@@ -10,6 +10,7 @@ controller_templates:
     credentials:
       - "Cloudflare"
       - "Hashicorp Vault"
+    extra_vars: { domain_name: "{{ domain_name }}" }
     state: present
 
   - name: "SSL // RHEL Cockpit"
@@ -22,6 +23,7 @@ controller_templates:
     credentials:
       - "RHEL admin"
       - "Wildcard cert files"
+    extra_vars: { domain_name: "{{ domain_name }}" }
     state: present
 
   - name: "SSL // Windows IIS"
@@ -34,4 +36,5 @@ controller_templates:
     credentials:
       - "Windows admin"
       - "Wildcard cert files"
+    extra_vars: { domain_name: "{{ domain_name }}" }
     state: present
