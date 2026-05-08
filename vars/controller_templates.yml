@@ -4,7 +4,7 @@ controller_templates:
     job_type: "run"
     inventory: "{{ inventory }}"
     project: "aap_ssl_demo"
-    playbook: "/playbooks/cloudflare_dns.yml"
+    playbook: "playbooks/cloudflare_dns.yml"
     execution_environment: "{{ execution_environment }}"
     label: "ssl_demo"
     credentials:
@@ -16,7 +16,7 @@ controller_templates:
     job_type: "run"
     inventory: "{{ inventory }}"
     project: "aap_ssl_demo"
-    playbook: "/playbooks/configure_cockpit.yml"
+    playbook: "playbooks/configure_cockpit.yml"
     execution_environment: "{{ execution_environment }}"
     label: "ssl_demo"
     credentials:
@@ -28,7 +28,7 @@ controller_templates:
     job_type: "run"
     inventory: "{{ inventory }}"
     project: "aap_ssl_demo"
-    playbook: "/playbooks/iis_ssl_renewal.yml"
+    playbook: "playbooks/iis_ssl_renewal.yml"
     execution_environment: "{{ execution_environment }}"
     label: "ssl_demo"
     credentials:
