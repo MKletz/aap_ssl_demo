@@ -6,7 +6,7 @@ controller_templates:
     project: "aap_ssl_demo"
     playbook: "playbooks/cloudflare_dns.yml"
     execution_environment: "{{ execution_environment }}"
-    label: "ssl_demo"
+    labels: "ssl_demo"
     credentials:
       - "Cloudflare"
       - "Hashicorp Vault"
@@ -18,7 +18,7 @@ controller_templates:
     project: "aap_ssl_demo"
     playbook: "playbooks/configure_cockpit.yml"
     execution_environment: "{{ execution_environment }}"
-    label: "ssl_demo"
+    labels: "ssl_demo"
     credentials:
       - "RHEL admin"
       - "Wildcard cert files"
@@ -30,7 +30,7 @@ controller_templates:
     project: "aap_ssl_demo"
     playbook: "playbooks/iis_ssl_renewal.yml"
     execution_environment: "{{ execution_environment }}"
-    label: "ssl_demo"
+    labels: "ssl_demo"
     credentials:
       - "Windows admin"
       - "Wildcard cert files"

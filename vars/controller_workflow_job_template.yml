@@ -3,6 +3,7 @@ controller_workflows:
   - name: "SSL // Renewal Workflow"
     extra_vars: { domain_name: "{{ domain_name }}" }
     organization: Default
+    labels: "ssl_demo"
     simplified_workflow_nodes:
       - identifier: "ACME renewal from CloudFlare"
         unified_job_template: "SSL // CloudFlare challenege"
