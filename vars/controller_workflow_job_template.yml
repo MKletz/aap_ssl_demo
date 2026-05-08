@@ -1,5 +1,5 @@
 ---
-workflow_job_templates:
+controller_workflows:
   - name: "SSL // Renewal Workflow"
     extra_vars: { domain_name: "{{ domain_name }}" }
     simplified_workflow_nodes:
