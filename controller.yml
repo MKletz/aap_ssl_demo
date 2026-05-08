@@ -17,4 +17,3 @@
     - {role: infra.aap_configuration.controller_labels, when: controller_labels is defined}
     - {role: infra.aap_configuration.controller_job_templates, when: controller_templates is defined}
     - {role: infra.aap_configuration.controller_workflow_job_templates, when: controller_workflows is defined}
-    - {role: infra.aap_configuration.dispatch}
