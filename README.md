@@ -1,5 +1,6 @@
 # Setup
 - Update [Change Mes](/vars/change_mes.yml)
+- Run the [controller.yml](controller.yml) in a job template in the Control Plane Execution EE.
 - Update secrets created in [here](/vars/controller_credentials.yml).
     - CloudFlare email/token
     - RHEL Admin
