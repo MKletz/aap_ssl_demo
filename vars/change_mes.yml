@@ -2,3 +2,4 @@
 inventory: "Lab Inventory"
 execution_environment: "ee-mitchell-labs-default"
 domain_name: "mikemitchell.info"
+vault_url: "https://vault.internal.info"
