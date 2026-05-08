@@ -6,6 +6,6 @@ vault_url: "http://vault.apps.mitchell-labs.mikemitchell.info"
 #default for dev mode
 vault_token: "root"
 
-windows_admin_username: "ansible@ANSIBLE.LOCAL"
+windows_admin_username: "ansible@MIKEMITCHELL.INFO"
 rhel_admin_username: "mkletz"
 acme_email: "michael.kletz.27@gmail.com"
