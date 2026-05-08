@@ -1,0 +1,16 @@
+---
+workflow_job_templates:
+  - name: "SSL // Renewal Workflow"
+    extra_vars: { domain_name: "{{ domain_name }}" }
+    simplified_workflow_nodes:
+      - identifier: "ACME renewal from CloudFlare"
+        unified_job_template: "SSL // CloudFlare challenege"
+        success_nodes:
+          - "Update RHEL Cockpit SSL"
+          - "Update Windows IIS"
+
+      - identifier: "Update RHEL Cockpit SSL"
+        unified_job_template: "SSL // RHEL Cockpit"
+
+      - identifier: "Update Windows IIS"
+        unified_job_template: "SSL // Windows IIS"
