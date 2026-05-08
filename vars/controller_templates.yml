@@ -1,7 +1,6 @@
 ---
 controller_templates:
-  - name: Create cloudflare template
-    name: "SSL // CloudFlare challenege"
+  - name: "SSL // CloudFlare challenege"
     job_type: "run"
     inventory: "{{ inventory }}"
     project: "aap_ssl_demo"
@@ -13,8 +12,7 @@ controller_templates:
       - "Hashicorp Vault"
     state: present
 
-  - name: Create rhel template
-    name: "SSL // RHEL Cockpit"
+  - name: "SSL // RHEL Cockpit"
     job_type: "run"
     inventory: "{{ inventory }}"
     project: "aap_ssl_demo"
@@ -26,8 +24,7 @@ controller_templates:
       - "Wildcard cert files"
     state: present
 
-  - name: Create windows template
-    name: "SSL // Windows IIS"
+  - name: "SSL // Windows IIS"
     job_type: "run"
     inventory: "{{ inventory }}"
     project: "aap_ssl_demo"
