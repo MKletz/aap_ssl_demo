@@ -6,8 +6,7 @@
     - name: Include vars from vars directory
       ansible.builtin.include_vars:
         dir: ./vars
-        #dir: ./testing
-        extensions: ["yml"]
+        extensions: ["yml","yaml"]
   roles:
     - {role: infra.aap_configuration.controller_projects, when: controller_projects is defined}
     - {role: infra.aap_configuration.controller_credential_types, when: controller_credential_types is defined}
